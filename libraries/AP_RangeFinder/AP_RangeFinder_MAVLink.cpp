@@ -66,7 +66,7 @@ int16_t AP_RangeFinder_MAVLink::min_distance_cm() const
     if (params.min_distance_cm > _min_distance_cm) {
         return params.min_distance_cm;
     }
-    return _min_distance_cm;
+    return params.min_distance_cm;
 }
 
 /*
