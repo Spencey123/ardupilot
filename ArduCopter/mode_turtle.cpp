@@ -22,7 +22,8 @@ bool ModeTurtle::init(bool ignore_checks)
     if (!is_zero(channel_pitch->norm_input_dz())
         || !is_zero(channel_roll->norm_input_dz())
         || !is_zero(channel_yaw->norm_input_dz())
-        || !is_zero(channel_throttle->norm_input_dz())) {
+        //|| !is_zero(channel_throttle->norm_input_dz())
+        ) {
         return false;
     }
 
