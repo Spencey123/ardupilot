@@ -27,8 +27,6 @@
 --
 -- When the 2nd auxiliary switch (300/Scripting1) is pulled high automatic source selection uses these thresholds:
 -- luacheck: only 0
----@diagnostic disable: cast-local-type
----@diagnostic disable: need-check-nil
 
 local rangefinder_rotation = 25     -- check downward (25) facing lidar
 local source_prev = 0               -- previous source, defaults to primary source
@@ -44,6 +42,7 @@ local scr_user1_param = Parameter('SCR_USER1') -- user1 param (rangefinder altit
 local scr_user2_param = Parameter('SCR_USER2') -- user2 param (GPS speed accuracy threshold)
 local scr_user3_param = Parameter('SCR_USER3') -- user3 param (optical flow quality threshold)
 local scr_user4_param = Parameter('SCR_USER4') -- user4 param (optical flow innovation threshold)
+local scr_user5_param = Parameter('SCR_USER5') -- user5 param (GPS sat count threshold)
 
 assert(optical_flow, 'could not access optical flow')
 
@@ -102,10 +101,19 @@ function update()
     return update, 1000
   end
 
+  -- check gps count threshold has been set
+  local gps_num_thresh = scr_user5_param:get()              -- SCR_USER5 holds GPS sat number threshold
+  if (gps_num_thresh <= 0) then
+    gcs:send_text(0, "ahrs-source-gps-optflow.lua: set SCR_USER5 to GPS sat number threshold")
+    return update, 1000
+  end
+
+
   -- check if GPS speed accuracy is over threshold
+  local gps_numsats = gps:num_sats(gps:primary_sensor())
   local gps_speed_accuracy = gps:speed_accuracy(gps:primary_sensor())
   local gps_over_threshold = (gps_speed_accuracy == nil) or (gps:speed_accuracy(gps:primary_sensor()) > gps_speedaccuracy_thresh)
-  local gps_usable = (gps_speed_accuracy ~= nil) and (gps_speed_accuracy <= gps_usable_accuracy)
+  local gps_usable = (gps_numsats >= gps_num_thresh) and (gps_speed_accuracy ~= nil) and (gps_speed_accuracy <= gps_usable_accuracy)
 
   -- check optical flow quality
   local opticalflow_quality_good = false
@@ -139,7 +147,7 @@ function update()
   -- GPS vs opticalflow vote. "-1" to move towards GPS, "+1" to move to Non-GPS
   if (not gps_over_threshold) or (gps_usable and not opticalflow_usable) then
     -- vote for GPS if GPS accuracy good OR GPS is usable and opticalflow is unusable
-    gps_vs_opticalflow_vote = math.max(gps_vs_opticalflow_vote - 1, -vote_counter_max)
+    gps_vs_opticalflow_vote = math.max(gps_vs_opticalflow_vote - 1, -vote_counter_max) 
   elseif opticalflow_usable then
     -- vote for opticalflow if usable
     gps_vs_opticalflow_vote = math.min(gps_vs_opticalflow_vote + 1, vote_counter_max)
