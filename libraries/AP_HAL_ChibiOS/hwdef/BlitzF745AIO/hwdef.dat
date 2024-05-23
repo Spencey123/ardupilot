@@ -151,7 +151,7 @@ define HAL_PROBE_EXTERNAL_I2C_COMPASSES
 define HAL_I2C_INTERNAL_MASK 0
 
 # save some flash
-include ../include/minimize_fpv_osd.inc
+include ../include/minimize_fpv_osd_OPT.inc
 
 # one IMU: bmi270
 IMU BMI270 SPI:bmi270 ROTATION_ROLL_180_YAW_135
