@@ -18,12 +18,13 @@
 --     EK3_SRC2_YAW   = 1 (Compass)
 --     EK3_SRC_OPTIONS    = 0 (Do not fuse all velocities)
 --
--- SCR_USER1 holds the threshold (in meters) for rangefinder altitude (around 15 is a good choice)
+-- SCR_USER1 holds the threshold (in meters) for rangefinder altitude (around 4 is a good choice, 2 for testing)
 --     if rangefinder distance >= SCR_USER1, source1 (GPS) will be used
 --     if rangefinder distance < SCR_USER1, source2 (optical flow) will be used if innovations are below SRC_USER3 value
 -- SCR_USER2 holds the threshold for GPS speed accuracy (around 0.3 is a good choice)
--- SCR_USER3 holds the threshold for optical flow quality (about 50 is a good choice)
--- SCR_USER4 holds the threshold for optical flow innovations (about 0.15 is a good choice)
+-- SCR_USER3 holds the threshold for optical flow quality (about 65 is a good choice)
+-- SCR_USER4 holds the threshold for optical flow innovations (about 1 is a good choice for the MTF-01)
+-- SCR_USER5 holds the satcount above which GPS will start being trusted (15 is fine for M10 chips)
 --
 -- When the 2nd auxiliary switch (300/Scripting1) is pulled high automatic source selection uses these thresholds:
 -- luacheck: only 0
