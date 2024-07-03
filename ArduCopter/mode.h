@@ -471,7 +471,9 @@ public:
     }
     bool allows_autotune() const override { return true; }
     bool allows_flip() const override { return true; }
-
+#if FRAME_CONFIG == HELI_FRAME
+    bool allows_inverted() const override { return true; };
+#endif
 protected:
 
     const char *name() const override { return "ALT_HOLD"; }
@@ -499,6 +501,9 @@ public:
     bool allows_arming(AP_Arming::Method method) const override;
     bool is_autopilot() const override { return true; }
     bool in_guided_mode() const override { return _mode == SubMode::NAVGUIDED || _mode == SubMode::NAV_SCRIPT_TIME; }
+#if FRAME_CONFIG == HELI_FRAME
+    bool allows_inverted() const override { return true; };
+#endif
 
     // Auto modes
     enum class SubMode : uint8_t {
@@ -1127,7 +1132,7 @@ protected:
 private:
 
     // enum for GUID_OPTIONS parameter
-    enum class Options : int32_t {
+    enum class Option : uint32_t {
         AllowArmingFromTX   = (1U << 0),
         // this bit is still available, pilot yaw was mapped to bit 2 for symmetry with auto
         IgnorePilotYaw      = (1U << 2),
@@ -1137,6 +1142,9 @@ private:
         WPNavUsedForPosControl = (1U << 6),
         AllowWeatherVaning = (1U << 7)
     };
+
+    // returns true if the Guided-mode-option is set (see GUID_OPTIONS)
+    bool option_is_enabled(Option option) const;
 
     // wp controller
     void wp_control_start();
@@ -1246,6 +1254,10 @@ public:
     bool is_autopilot() const override { return false; }
     bool has_user_takeoff(bool must_navigate) const override { return true; }
     bool allows_autotune() const override { return true; }
+
+#if FRAME_CONFIG == HELI_FRAME
+    bool allows_inverted() const override { return true; };
+#endif
 
 #if AC_PRECLAND_ENABLED
     void set_precision_loiter_enabled(bool value) { _precision_loiter_enabled = value; }
