@@ -208,6 +208,8 @@ void Tailsitter::setup()
         return;
     }
 
+    quadplane.thrust_type = QuadPlane::ThrustType::TAILSITTER;
+
     // Set tailsitter transition rate to match old calculation
     if (!transition_rate_fw.configured()) {
         transition_rate_fw.set_and_save(transition_angle_fw / (quadplane.transition_time_ms/2000.0f));
@@ -241,7 +243,7 @@ void Tailsitter::setup()
         quadplane.options.set(quadplane.options.get() | int32_t(QuadPlane::OPTION::ONLY_ARM_IN_QMODE_OR_AUTO));
     }
 
-    transition = new Tailsitter_Transition(quadplane, motors, *this);
+    transition = NEW_NOTHROW Tailsitter_Transition(quadplane, motors, *this);
     if (!transition) {
         AP_BoardConfig::allocation_error("tailsitter transition");
     }

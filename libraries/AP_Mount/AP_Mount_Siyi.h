@@ -27,7 +27,7 @@
 #include <AP_Math/AP_Math.h>
 #include <AP_Common/AP_Common.h>
 
-#define AP_MOUNT_SIYI_PACKETLEN_MAX     38  // maximum number of bytes in a packet sent to or received from the gimbal
+#define AP_MOUNT_SIYI_PACKETLEN_MAX     42  // maximum number of bytes in a packet sent to or received from the gimbal
 
 class AP_Mount_Siyi : public AP_Mount_Backend_Serial
 {
@@ -82,6 +82,12 @@ public:
     // send camera settings message to GCS
     void send_camera_settings(mavlink_channel_t chan) const override;
 
+    // change camera settings not normally used by autopilot
+    // THERMAL_PALETTE: 0:WhiteHot, 2:Sepia, 3:IronBow, 4:Rainbow, 5:Night, 6:Aurora, 7:RedHot, 8:Jungle, 9:Medical, 10:BlackHot, 11:GloryHot
+    // THERMAL_GAIN: 0:Low gain (50C ~ 550C), 1:High gain (-20C ~ 150C)
+    // THERMAL_RAW_DATA: 0:Disable Raw Data (30fps), 1:Enable Raw Data (25fps)
+    bool change_setting(CameraSetting setting, float value) override;
+
     //
     // rangefinder
     //
@@ -118,8 +124,12 @@ private:
         ABSOLUTE_ZOOM = 0x0F,
         SET_CAMERA_IMAGE_TYPE = 0x11,
         READ_RANGEFINDER = 0x15,
+        SET_THERMAL_PALETTE = 0x1B,
         EXTERNAL_ATTITUDE = 0x22,
         SET_TIME = 0x30,
+        SET_THERMAL_RAW_DATA = 0x34,
+        SET_THERMAL_GAIN = 0x38,
+        POSITION_DATA = 0x3e,
     };
 
     // Function Feedback Info packet info_type values
@@ -163,6 +173,7 @@ private:
         A8,
         ZR10,
         ZR30,
+        ZT6,
         ZT30
     } _hardware_model;
 
@@ -332,9 +343,9 @@ private:
     uint32_t _last_rangefinder_dist_ms;             // system time of last successful read of rangefinder distance
     float _rangefinder_dist_m;                      // distance received from rangefinder
 
-    // sending of attitude to gimbal
+    // sending of attitude and position to gimbal
     uint32_t _last_attitude_send_ms;
-    void send_attitude(void);
+    void send_attitude_position(void);
 
     // hardware lookup table indexed by HardwareModel enum values (see above)
     struct HWInfo {

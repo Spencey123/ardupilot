@@ -42,6 +42,7 @@
 #if CONFIG_HAL_BOARD == HAL_BOARD_SITL
 #include <SITL/SITL.h>
 #endif
+#include <AP_NavEKF3/AP_NavEKF3_feature.h>
 
 #define ATTITUDE_CHECK_THRESH_ROLL_PITCH_RAD radians(10)
 #define ATTITUDE_CHECK_THRESH_YAW_RAD radians(20)
@@ -591,8 +592,8 @@ void AP_AHRS::update_EKF2(void)
             // Use the primary EKF to select the primary gyro
             const AP_InertialSensor &_ins = AP::ins();
             const int8_t primary_imu = EKF2.getPrimaryCoreIMUIndex();
-            const uint8_t primary_gyro = primary_imu>=0?primary_imu:_ins.get_primary_gyro();
-            const uint8_t primary_accel = primary_imu>=0?primary_imu:_ins.get_primary_accel();
+            const uint8_t primary_gyro = primary_imu>=0?primary_imu:_ins.get_first_usable_gyro();
+            const uint8_t primary_accel = primary_imu>=0?primary_imu:_ins.get_first_usable_accel();
 
             // get gyro bias for primary EKF and change sign to give gyro drift
             // Note sign convention used by EKF is bias = measurement - truth
@@ -660,8 +661,8 @@ void AP_AHRS::update_EKF3(void)
 
             // Use the primary EKF to select the primary gyro
             const int8_t primary_imu = EKF3.getPrimaryCoreIMUIndex();
-            const uint8_t primary_gyro = primary_imu>=0?primary_imu:_ins.get_primary_gyro();
-            const uint8_t primary_accel = primary_imu>=0?primary_imu:_ins.get_primary_accel();
+            const uint8_t primary_gyro = primary_imu>=0?primary_imu:_ins.get_first_usable_gyro();
+            const uint8_t primary_accel = primary_imu>=0?primary_imu:_ins.get_first_usable_accel();
 
             // get gyro bias for primary EKF and change sign to give gyro drift
             // Note sign convention used by EKF is bias = measurement - truth
@@ -2338,7 +2339,7 @@ void  AP_AHRS::writeOptFlowMeas(const uint8_t rawFlowQuality, const Vector2f &ra
 #if HAL_NAVEKF2_AVAILABLE
     EKF2.writeOptFlowMeas(rawFlowQuality, rawFlowRates, rawGyroRates, msecFlowMeas, posOffset, heightOverride);
 #endif
-#if HAL_NAVEKF3_AVAILABLE
+#if EK3_FEATURE_OPTFLOW_FUSION
     EKF3.writeOptFlowMeas(rawFlowQuality, rawFlowRates, rawGyroRates, msecFlowMeas, posOffset, heightOverride);
 #endif
 }
@@ -2346,7 +2347,7 @@ void  AP_AHRS::writeOptFlowMeas(const uint8_t rawFlowQuality, const Vector2f &ra
 // retrieve latest corrected optical flow samples (used for calibration)
 bool AP_AHRS::getOptFlowSample(uint32_t& timeStamp_ms, Vector2f& flowRate, Vector2f& bodyRate, Vector2f& losPred) const
 {
-#if HAL_NAVEKF3_AVAILABLE
+#if EK3_FEATURE_OPTFLOW_FUSION
     return EKF3.getOptFlowSample(timeStamp_ms, flowRate, bodyRate, losPred);
 #endif
     return false;
@@ -3215,7 +3216,7 @@ uint8_t AP_AHRS::_get_primary_IMU_index() const
 #endif
     }
     if (imu == -1) {
-        imu = AP::ins().get_primary_gyro();
+        imu = AP::ins().get_first_usable_gyro();
     }
     return imu;
 }
@@ -3536,7 +3537,7 @@ bool AP_AHRS::get_velocity_NED(Vector3f &vec) const
 
 // return location corresponding to vector relative to the
 // vehicle's origin
-bool AP_AHRS::get_location_from_origin_offset(Location &loc, const Vector3p &offset_ned) const
+bool AP_AHRS::get_location_from_origin_offset_NED(Location &loc, const Vector3p &offset_ned) const
 {
     if (!get_origin(loc)) {
         return false;
@@ -3548,7 +3549,7 @@ bool AP_AHRS::get_location_from_origin_offset(Location &loc, const Vector3p &off
 
 // return location corresponding to vector relative to the
 // vehicle's home location
-bool AP_AHRS::get_location_from_home_offset(Location &loc, const Vector3p &offset_ned) const
+bool AP_AHRS::get_location_from_home_offset_NED(Location &loc, const Vector3p &offset_ned) const
 {
     if (!home_is_set()) {
         return false;

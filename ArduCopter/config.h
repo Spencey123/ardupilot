@@ -70,10 +70,6 @@
 // Rangefinder
 //
 
-#ifndef RANGEFINDER_ENABLED
- # define RANGEFINDER_ENABLED ENABLED
-#endif
-
 #ifndef RANGEFINDER_FILT_DEFAULT
  # define RANGEFINDER_FILT_DEFAULT 0.5f     // filter for rangefinder distance
 #endif
@@ -122,12 +118,6 @@
 //  Auto Tuning
 #ifndef AUTOTUNE_ENABLED
  # define AUTOTUNE_ENABLED  ENABLED
-#endif
-
-//////////////////////////////////////////////////////////////////////////////
-// Parachute release
-#ifndef PARACHUTE
- # define PARACHUTE HAL_PARACHUTE_ENABLED
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
@@ -598,10 +588,6 @@
 
 #if TOY_MODE_ENABLED && FRAME_CONFIG == HELI_FRAME
   #error Toy mode is not available on Helicopters
-#endif
-
-#ifndef OSD_ENABLED
- #define OSD_ENABLED DISABLED
 #endif
 
 #ifndef HAL_FRAME_TYPE_DEFAULT
